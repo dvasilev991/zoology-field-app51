@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="bg">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, shrink-to-fit=no, viewport-fit=cover, interactive-widget=resizes-content" />
+  <meta name="theme-color" content="#0f1727" />
+  <meta name="description" content="ORIOLUS — полеви формуляр за биологични проучвания, мониторинг и биостатистика." />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <title>ORIOLUS</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    :root{--bg:#f1f5f9;--card:#fff;--ink:#0f172a;--muted:#64748b;--line:#cbd5e1;--accent:#0f172a;--ok:#166534;--bad:#b91c1c;--soft:#f8fafc;--blue:#1d4ed8;--green:#15803d;--yellow:#a16207;--orange:#c2410c;--red:#b91c1c;--violet:#7c3aed;--gray:#475569}
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent} html{-webkit-text-size-adjust:100%;text-size-adjust:100%;overflow-x:hidden;width:100%;max-width:100%} body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.34;touch-action:manipulation;overflow-x:hidden;width:100%;max-width:100%}
+    header{position:sticky;top:0;z-index:5;background:rgba(255,255,255,.96);border-bottom:1px solid #e2e8f0;backdrop-filter:blur(8px);padding-top:max(env(safe-area-inset-top),12px);width:100%;max-width:100%}
+    .wrap{width:100%;max-width:980px;margin:0 auto;padding:8px max(12px, env(safe-area-inset-right)) 10px max(12px, env(safe-area-inset-left))}.head{display:flex;gap:10px;align-items:flex-start;justify-content:space-between;width:100%}.head>*{min-width:0}.title{font-weight:800;font-size:16px;line-height:1.16;letter-spacing:-.01em;max-width:calc(100% - 92px);word-break:break-word}.title i{font-style:italic}.title.logo{font-weight:900;font-size:30px;line-height:1;letter-spacing:.18em;text-transform:uppercase;color:#0f172a;text-shadow:0 1px 0 rgba(255,255,255,.8);max-width:calc(100% - 92px)}.sub{font-size:11px;color:var(--muted);margin-top:6px;line-height:1.25;max-width:calc(100% - 92px)}
+    main{width:100%;max-width:980px;margin:0 auto;padding:8px max(8px, env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));display:grid;grid-template-columns:minmax(0,1fr);gap:10px}.card{background:var(--card);border:1px solid #e2e8f0;border-radius:16px;padding:12px;box-shadow:0 1px 2px rgba(15,23,42,.04);width:100%;max-width:100%;overflow:hidden}
+    h2{font-size:15px;margin:0 0 10px}.grid{display:grid;grid-template-columns:minmax(0,1fr);gap:9px}.grid2{display:grid;grid-template-columns:minmax(0,1fr);gap:8px}.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.grid4{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+    label{display:block;font-size:13px;font-weight:650;color:#334155;margin-bottom:5px}.hint{font-size:11px;color:var(--muted);margin-top:4px}
+    input,select,textarea{width:100%;max-width:100%;border:1px solid var(--line);border-radius:12px;padding:9px 10px;font-size:15px;background:#fff;color:var(--ink);outline:none} textarea{min-height:76px;resize:vertical} input:focus,select:focus,textarea:focus{border-color:#475569;box-shadow:0 0 0 3px rgba(71,85,105,.12)} input[readonly]{background:#f8fafc;color:#475569}
+    button,.button{border:0;border-radius:12px;padding:10px 11px;font-size:14px;font-weight:750;background:var(--accent);color:#fff;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:7px;min-width:0;max-width:100%}.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}.danger{background:#fee2e2;color:var(--bad);border:1px solid #fecaca}.ok{background:#dcfce7;color:var(--ok);border:1px solid #bbf7d0}.small{font-size:12px;padding:7px 9px;border-radius:10px}.full{width:100%}
+    .pillbar{display:flex;gap:7px;flex-wrap:wrap}.pill{background:#fff;border:1px solid var(--line);color:#334155;border-radius:999px;padding:8px 10px;font-size:12px}.pill.on{background:#0f172a;color:#fff;border-color:#0f172a}
+    .status{font-size:13px;color:#475569}.stickybar{position:sticky;bottom:0;background:linear-gradient(transparent,#f1f5f9 24%);padding:18px 0 calc(4px + env(safe-area-inset-bottom));display:grid;grid-template-columns:minmax(0,1fr);gap:8px;z-index:4}.summary{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.metric{background:var(--soft);border:1px solid #e2e8f0;border-radius:13px;padding:9px}.metric b{font-size:16px}.metric span{display:block;font-size:11px;color:var(--muted)}
+    body.splash-active{overflow:hidden;background:#0f1727}
+    .app-splash{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:#0f1727;padding:max(24px,env(safe-area-inset-top)) max(24px,env(safe-area-inset-right)) max(24px,env(safe-area-inset-bottom)) max(24px,env(safe-area-inset-left));opacity:0;visibility:visible;animation:splashFadeIn .28s ease-out forwards;transition:opacity .55s ease,visibility .55s ease}
+    .app-splash.hidden{opacity:0!important;visibility:hidden;pointer-events:none}
+    .app-splash img{display:block;width:min(58vw,240px);max-width:240px;height:auto;background:transparent;box-shadow:none;border:0;border-radius:0}
+    @keyframes splashFadeIn{from{opacity:0}to{opacity:1}}
+    .field-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:5px}.field-head label{margin-bottom:0}.lock-btn{width:36px;height:32px;min-width:36px;min-height:32px;padding:0;border-radius:10px;background:#fff;color:#475569;border:1px solid var(--line);font-size:15px;line-height:1}.lock-btn.locked{background:#0f172a;color:#fff;border-color:#0f172a;box-shadow:0 0 0 3px rgba(15,23,42,.10)}.lock-btn:active{transform:scale(.94)}
+    .export-block{border-top:1px solid #e2e8f0;margin-top:12px;padding-top:12px}
+    .record{border:1px solid #e2e8f0;border-radius:13px;padding:10px;margin-top:8px;background:#fff}.record.active{border-color:#0f172a;background:#eef2ff;box-shadow:0 0 0 2px rgba(15,23,42,.10)}.record.active .id::after{content:"  • отворен";font-size:11px;color:#166534;font-weight:800}.record .id{font-weight:800}.record .meta{font-size:12px;color:var(--muted)}.tabs{display:flex;gap:7px;overflow:auto;padding-bottom:2px;scrollbar-width:none;width:100%;max-width:100%}.tabs::-webkit-scrollbar{display:none}.tab{white-space:nowrap;background:#fff;color:#334155;border:1px solid #e2e8f0;padding:10px 14px;font-size:13px;flex:0 0 auto;max-width:100%}.tab.active{background:#0f172a;color:#fff;border-color:#0f172a}.hidden{display:none!important}.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}.row{display:flex;gap:8px;flex-wrap:wrap}.row>*{flex:1;min-width:0}.section-note{font-size:12px;color:#475569;background:#f8fafc;border:1px solid #e2e8f0;padding:9px;border-radius:12px;margin-bottom:10px}.install-note{font-size:12px;color:#475569}.kbd{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:#e2e8f0;border-radius:5px;padding:1px 4px}
+    .cover-toolbar{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;margin-bottom:10px}.cover-cats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.catbtn{justify-content:flex-start;gap:9px;border:1px solid #e2e8f0;color:#0f172a;background:#fff;text-align:left;min-height:42px}.cover-dot,.legend-dot{width:16px;height:16px;min-width:16px;min-height:16px;flex:0 0 16px;border-radius:50%;display:inline-block;vertical-align:middle}.cat-herbaceous{background:#22c55e}.cat-bareSoil{background:#a16207}.cat-gravelSmallStones{background:#94a3b8}.cat-largeStones{background:#64748b}.cat-exposedRock{background:#334155}.cat-juniper{background:#15803d}.cat-otherShrubs{background:#65a30d}.cat-litterMossLichen{background:#84cc16}.cat-riverStream{background:#0ea5e9}.cat-standingWater{background:#2563eb}.cat-riparianVegetation{background:#22d3ee}.cat-marshWetland{background:#06b6d4}.cat-openSea{background:#1e3a8a}.cat-coastline{background:#eab308}.cat-cliffsGorge{background:#78716c}.cat-arableLand{background:#f59e0b}.cat-forestBroadleaf{background:#16a34a}.cat-forestConiferous{background:#166534}.cat-forestMixed{background:#4d7c0f}.cat-buildings{background:#ef4444}.cat-landfill{background:#7c2d12}.cat-other{background:#6b7280}
+    .pointgrid{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:3px;margin-top:10px;max-width:100%}.pointcell{min-height:44px;border-radius:9px;background:#e2e8f0;border:1px solid rgba(15,23,42,.08);font-size:10px;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;cursor:pointer;line-height:1.05;padding:2px}.pointcell.empty{background:#f8fafc;color:#94a3b8}.pointcell .ptno{font-weight:850;font-size:10px}.pointcell .ptcat{font-weight:900;font-size:12px}.pointcell.empty .ptcat{font-weight:700;font-size:10px;color:#cbd5e1}.progressbar{height:9px;background:#e2e8f0;border-radius:999px;overflow:hidden;margin:8px 0}.progressbar>div{height:100%;background:#0f172a;width:0%}.cover-counts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.cover-counts input{font-size:16px}.transect-scheme{background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;padding:10px;text-align:center;line-height:1.45;margin-bottom:10px;color:#334155;overflow:auto}.transect-buttons{display:flex;gap:7px;margin:8px 0;overflow-x:auto;padding-bottom:3px;scrollbar-width:none}.transect-buttons::-webkit-scrollbar{display:none}.transect-btn{background:#fff;color:#334155;border:1px solid #cbd5e1;white-space:nowrap;min-width:90px;flex:0 0 auto}.transect-btn.active{background:#0f172a;color:#fff;border-color:#0f172a}.transect-grid{display:grid;grid-template-columns:1fr;gap:10px;margin-top:10px}.transect-card{border:1px solid #e2e8f0;background:#fff;border-radius:14px;padding:9px}.transect-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;font-size:13px;font-weight:800}.transect-cells{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px}.legend-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin:8px 0}.legend-item{display:flex;align-items:center;gap:6px;border:1px solid #e2e8f0;border-radius:10px;background:#fff;padding:6px 8px;font-size:12px;color:#334155;min-width:0}.legend-dot{width:16px;height:16px;min-width:16px;min-height:16px;border-radius:50%;display:inline-block;flex:0 0 16px;vertical-align:middle}.stats-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}.stats-table th,.stats-table td{border-bottom:1px solid #e2e8f0;padding:7px 6px;text-align:left}.stats-table th{color:#475569;font-weight:800;background:#f8fafc}.stats-table td:nth-child(2),.stats-table td:nth-child(3){text-align:right;font-variant-numeric:tabular-nums}.stats-box{margin-top:10px}.warn{color:#b45309;font-weight:700}.oktext{color:#166534;font-weight:700}
+
+    .map-card{padding:0;overflow:hidden}.map-header{padding:12px;border-bottom:1px solid #e2e8f0}.map-controls{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;padding:12px}.map-container{height:430px;min-height:360px;width:100%;max-width:100%;background:#e2e8f0;border-top:1px solid #e2e8f0;border-bottom:1px solid #e2e8f0;cursor:crosshair}.map-status{font-size:12px;color:#475569;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:9px;margin-top:8px}.trackline{display:grid;grid-template-columns:minmax(0,1fr);gap:8px}.leaflet-container{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}.leaflet-popup-content{font-size:13px;line-height:1.3}.leaflet-control-layers{border-radius:12px;box-shadow:0 2px 10px rgba(15,23,42,.18)}.map-note{font-size:12px;color:#64748b;padding:0 12px 12px}
+
+    .location-field{position:relative}.location-suggestions{position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:30;background:#fff;border:1px solid #cbd5e1;border-radius:12px;box-shadow:0 10px 22px rgba(15,23,42,.16);overflow:hidden;max-height:230px;overflow-y:auto}.location-suggestion{width:100%;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px;align-items:center;background:#fff;color:#0f172a;border:0;border-bottom:1px solid #e2e8f0;border-radius:0;padding:0;text-align:left}.location-suggestion:last-child{border-bottom:0}.location-suggestion-name{display:block;padding:10px 11px;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.species-bg{font-weight:800}.species-sci{font-style:italic;color:#475569}.species-group{display:inline-block;margin-left:6px;font-size:11px;color:#64748b;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:999px;padding:1px 6px}.species-options{display:grid;grid-template-columns:1fr;gap:6px;margin-top:7px}.checkline{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:650;color:#334155;margin:0}.checkline input{width:auto;max-width:none;transform:scale(1.1)}.species-locked{background:#f8fafc;color:#475569}.location-suggestion-remove{display:flex;align-items:center;justify-content:center;width:40px;height:38px;color:#b91c1c;font-weight:900;font-size:16px;border-left:1px solid #e2e8f0}.location-suggestion:active,.location-suggestion-name:active,.location-suggestion-remove:active{transform:scale(.985);filter:brightness(.96)}
+
+    .stationary-compass{max-width:320px;margin:10px auto 14px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;align-items:center;justify-items:center;text-align:center}.compass-btn{width:56px;height:56px;min-width:56px;min-height:56px;padding:0;border-radius:999px;background:#fff;color:#334155;border:1.5px solid #cbd5e1;font-weight:800;box-shadow:0 1px 2px rgba(15,23,42,.05)}.compass-btn.active{background:#0f172a;color:#fff;border-color:#0f172a;box-shadow:0 0 0 3px rgba(15,23,42,.10)}.compass-center{position:relative;display:flex;align-items:center;justify-content:center;width:92px;height:92px;border:1.5px dashed #94a3b8;border-radius:999px;background:radial-gradient(circle at 50% 45%,#fff 0%,#f8fafc 70%,#eef2f7 100%);color:#475569;font-weight:800;overflow:hidden;box-shadow:inset 0 1px 2px rgba(15,23,42,.06)}.device-compass-arrow{position:absolute;left:50%;top:50%;z-index:1;width:64px;height:64px;filter:drop-shadow(0 2px 2px rgba(15,23,42,.24));transform:translate(-50%,-50%) rotate(0deg);transform-origin:center center;transition:transform .18s linear, opacity .2s ease;opacity:.96}.device-compass-arrow .north-side{fill:#ff7a00}.device-compass-arrow .north-main{fill:#f80d1a}.device-compass-arrow.unavailable{opacity:.22;filter:grayscale(1)}.migration-mode-box{border:1px solid #e2e8f0;background:#f8fafc;border-radius:14px;padding:10px;margin-top:8px}
+
+    .threat-options{display:flex;flex-wrap:wrap;gap:7px}.threat-pill{background:#fff;border:1px solid var(--line);color:#334155;border-radius:999px;padding:8px 10px;font-size:12px}.threat-pill.on{background:#0f172a;color:#fff;border-color:#0f172a}.mto-note{font-size:12px;color:#475569;background:#f8fafc;border:1px solid #e2e8f0;padding:9px;border-radius:12px}
+    @media (min-width:800px){.species-options{grid-template-columns:1fr 1fr}.wrap{padding:8px 12px 10px}.head{align-items:center}.title{font-size:19px;max-width:none}.title.logo{font-size:34px;max-width:none}.sub{font-size:12px;max-width:none}main{grid-template-columns:minmax(0,1fr) 330px;padding:8px 8px calc(8px + env(safe-area-inset-bottom))}.grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.grid2{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.wide{grid-column:1/-1}.grid4{grid-template-columns:repeat(4,minmax(0,1fr))}.summary{grid-template-columns:repeat(4,minmax(0,1fr))}.side{position:sticky;top:96px;align-self:start}.cover-toolbar{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.cover-cats{grid-template-columns:repeat(3,minmax(0,1fr))}.cover-counts{grid-template-columns:repeat(3,minmax(0,1fr))}/* transect buttons remain horizontal */.stickybar{grid-template-columns:minmax(0,1fr) auto}.map-controls{grid-template-columns:repeat(3,minmax(0,1fr))}.trackline{grid-template-columns:repeat(4,minmax(0,1fr))}.map-container{height:520px}}
+
+    /* Simple button press feedback. Excludes the top tab menu (.tab) and does not affect dropdowns. */
+    button:not(.tab), .button, .record button{transition:transform .10s ease, filter .10s ease, box-shadow .10s ease}
+    button:not(.tab):active, .button:active, .record button:active{transform:scale(.97);filter:brightness(.96);box-shadow:inset 0 1px 3px rgba(15,23,42,.18)}
+    .pointcell{transition:transform .10s ease, filter .10s ease, box-shadow .10s ease, outline-color .10s ease}
+    .pointcell:active{transform:scale(.93);filter:brightness(.95);box-shadow:inset 0 1px 3px rgba(15,23,42,.25)}
+    .pointcell.selected{outline:3px solid #0f172a;outline-offset:2px;box-shadow:0 0 0 3px rgba(15,23,42,.16)}
+  </style>
+</head>
+<body class="splash-active">
+<div id="appSplash" class="app-splash" aria-hidden="true"><img src="icons/icon-512.png" alt="ORIOLUS logo" /></div>
+<header><div class="wrap head"><div><div class="title logo">ORIOLUS</div><div class="sub">Полеви формуляр за биологични проучвания, мониторинг и биостатистика.</div></div><button id="newBtn" class="small">＋ Нов</button></div></header>
+<main>
+  <section>
+    <div class="card status" id="status">Данните се съхраняват локално на устройството. Експортирай CSV/Excel/JSON/GeoJSON след терен.</div>
+    <div class="tabs" style="margin:10px 0"><button class="tab active" data-tab="basic">Основни</button><button class="tab" data-tab="map">Карта</button><button class="tab" data-tab="survey">Мониторинг</button><button class="tab" data-tab="habitat">Хабитат</button><button class="tab" data-tab="coverpoints">Трансекти</button><button class="tab" data-tab="stationary">Стационарно отчитане</button><button class="tab" data-tab="visibility">Видимост</button><button class="tab" data-tab="notes">Бележки</button></div>
+
+    <form id="form">
+      <div id="tab-basic" class="tabpane">
+        <div class="card"><h2>1. Основни данни и GPS</h2><div class="grid">
+          <div><label>ID</label><input id="id" name="id" /></div>
+          <div><div class="field-head"><label>Наблюдател</label><button type="button" class="lock-btn" data-lock-field="observer" aria-label="Заключи Наблюдател" title="Заключи Наблюдател">🔓</button></div><input name="observer" /></div>
+          <div class="wide location-field"><div class="field-head"><label>Вид</label><button type="button" class="lock-btn" data-lock-field="species" aria-label="Заключи Вид" title="Заключи Вид">🔓</button></div><input id="speciesInput" name="species" autocomplete="off" /><div id="speciesSuggestions" class="location-suggestions hidden"></div></div>
+          <div><label>Дата</label><input name="date" type="date" /></div>
+          <div><label>Час</label><input name="time" type="time" /></div>
+          <div class="wide location-field"><div class="field-head"><label>Локация</label><button type="button" class="lock-btn" data-lock-field="locality" aria-label="Заключи Локация" title="Заключи Локация">🔓</button></div><input id="localityInput" name="locality" autocomplete="off" /><div id="locationSuggestions" class="location-suggestions hidden"></div></div>
+          <div><label>Тип площадка</label><select name="plotType"><option value=""></option><option value="occupied">Заета площадка</option><option value="control">Контролна площадка</option><option value="nest">Гнездо</option><option value="territory_center">Център на териториална активност</option></select></div>
+          <div><label>Хабитатна страта</label><select name="habitatStratum"><option value=""></option><option value="open_stony_steppe">Гола/камениста степ</option><option value="herbaceous_steppe">Тревиста степ с открит субстрат</option><option value="juniper_steppe">Открита степ с разредена хвойна</option><option value="fallow_mosaic">Угар/аграрен мозаечен хабитат</option></select></div>
+          <div class="wide"><div class="grid2"><button type="button" class="ghost full" id="gpsBtn">📍 Вземи GPS координати</button><button type="button" class="ghost full" id="copyCoordsBtn">📋 Копирай координати</button></div><div class="hint">При Android APK координатите се вземат през native GPS. За по-добра надморска височина натисни бутона на открито и изчакай стабилизиране.</div></div>
+          <div><label>Latitude</label><input name="latitude" inputmode="decimal" /></div>
+          <div><label>Longitude</label><input name="longitude" inputmode="decimal" /></div>
+          <div><label>Надморска височина от GPS, m</label><input name="elevation" inputmode="decimal" /><div class="hint">Ориентировъчна стойност. За финални анализи провери/замени с DEM в QGIS.</div></div>
+          <div><label>Хоризонтална GPS точност, m</label><input name="gpsAccuracy" inputmode="decimal" /></div>
+          <div><label>Вертикална GPS точност, m</label><input name="verticalAccuracy" inputmode="decimal" /><div class="hint">Ако липсва или е висока, височината е ненадеждна.</div></div>
+          <div><label>Източник на височината</label><input name="altitudeSource" placeholder="gps / DEM / ръчно" /></div>
+          <div class="wide"><label>Бележки</label><textarea name="coordinateNote" placeholder="точка от разстояние, реално гнездо, център на активност..."></textarea></div>
+        </div></div>
+      </div>
+
+
+
+      <div id="tab-map" class="tabpane hidden">
+        <div class="card map-card">
+          <div class="map-header"><h2>2. Карта и GPS трак</h2>
+            <div class="map-status" id="mapStatus">Картата показва всички запазени точки. Текущо отвореният запис е обозначен с различен цвят. Продължително натискане върху картата записва избраните координати в текущия формуляр.</div>
+          </div>
+          <div class="map-controls">
+            <div><label>Картен слой</label><select id="mapLayerSelect"><option value="hybrid" selected>Hybrid</option><option value="satellite">Satellite</option><option value="osm">OSM</option></select></div>
+            <button type="button" class="ghost" id="refreshMapBtn">🗺️ Обнови картата</button>
+            <button type="button" class="ghost" id="showMyLocationBtn">📌 Покажи моята позиция</button>
+            <button type="button" class="ghost" id="centerMapBtn">📍 Центрирай към текущата точка</button>
+            <button type="button" class="ghost" id="savePointFromMapBtn">💾 Запази текущата точка</button>
+            <button type="button" id="startTrackBtn">▶ Старт трак</button>
+            <button type="button" class="ghost" id="stopTrackBtn">⏸ Стоп трак</button>
+            <button type="button" class="danger" id="clearTrackBtn">🗑 Изчисти трака</button>
+          </div>
+          <div class="map-note" id="trackInfo">При отваряне на картата се зареждат всички запазени точки. Текущо отвореният запис се отличава графично. Координати от карта се вземат само с продължително натискане върху избраното място.</div>
+          <div id="map" class="map-container"></div>
+        </div>
+      </div>
+
+      <div id="tab-survey" class="tabpane hidden">
+        <div class="card"><h2>2. Мониторинг и гнездово доказателство</h2><div class="grid">
+          <div><label>Гнездови статус</label><select name="breedingEvidence"><option value=""></option><option value="Доказано гнездене">Доказано гнездене</option><option value="Вероятно гнездене">Вероятно гнездене</option><option value="Възможно гнездене">Възможно гнездене</option><option value="Не гнездящ">Не гнездящ</option><option value="Мигриращ">Мигриращ</option><option value="Вид в гнездови хабитат">Вид в гнездови хабитат</option><option value="Пеещ мъжки">Пеещ мъжки</option><option value="Заета територия">Заета територия</option><option value="Гнездо с яйца">Гнездо с яйца</option><option value="Гнездо с малки">Гнездо с малки</option></select></div>
+          <div><label>Метод на установяване</label><select name="firstDetectionMethod"><option value=""></option><option value="passive_listening">Пасивно слушане</option><option value="playback_response">Реакция на провокация</option><option value="thermal_night">Термална оптика — нощ</option><option value="thermal_day">Термална оптика — ден</option><option value="visual_day">Дневно визуално наблюдение</option><option value="incidental">Случайно наблюдение</option></select></div>
+          <div><label>Термална оптика</label><select name="thermalUsed"><option value=""></option><option value="no">Не</option><option value="yes_night">Да — нощем</option><option value="yes_day">Да — денем</option><option value="yes_both">Да — денем и нощем</option></select></div>
+          <div><label>Брой птици</label><input name="numberOfBirds" inputmode="numeric" /></div>
+          <div><label>Пол</label><select name="sex"><option value=""></option><option value="undetermined">Неопределен</option><option value="male">Мъжки</option><option value="female">Женски</option></select></div>
+          <div><label>Възраст</label><select name="age"><option value=""></option><option value="adult">Възрастен</option><option value="flightless_chick">Нелетящо малко</option><option value="recently_fledged">Наскоро излетяло малко</option></select></div>
+          <div><label>Местоположение на гнездо</label><input name="nestLocation" /></div>
+          <div><label>Брой яйца</label><input name="eggCount" inputmode="numeric" /></div>
+          <div><label>Брой малки в гнездо</label><input name="chickCount" inputmode="numeric" /></div>
+          <div><label>Брой излетели малки</label><input name="fledgedYoungCount" inputmode="numeric" /></div>
+          <div><label>Поведение</label><select name="behaviour"><option value=""></option><option value="Обаждане">Обаждане</option><option value="Пеещ мъжки">Пеещ мъжки</option><option value="Симулиране на ранена птица / Проява на тревога">Симулиране на ранена птица / Проява на тревога</option><option value="Посещаване на скрито гнездо/мътене">Посещаване на скрито гнездо/мътене</option><option value="Хранене">Хранене</option><option value="Стационарно">Стационарно</option><option value="В полет">В полет</option><option value="Носене на храна за малки">Носене на храна за малки</option></select></div>
+          <div class="wide"><label>Мъртъв индивид (причини)</label><input name="deadIndividualCauses" /></div>
+        </div></div>
+      </div>
+
+      <div id="tab-habitat" class="tabpane hidden">
+        <div class="card"><h2>3. Наклон, изложение и обобщена покривка</h2><div class="section-note">Тук остават обобщените данни за цялата площадка. Подробното въвеждане на точките по двата перпендикулярни трансекта е отделено в таб „Трансекти“ и автоматично попълва броя по категории.</div><div class="grid">
+          <div class="wide location-field"><label>Вид на хабитат</label><input id="habitatTypeInput" name="habitatType" autocomplete="off" /><div id="habitatTypeSuggestions" class="location-suggestions hidden"></div></div>
+          <div><label>Наклон 1, °</label><input name="slope1" inputmode="decimal" /></div><div><label>Наклон 2, °</label><input name="slope2" inputmode="decimal" /></div><div><label>Наклон 3, °</label><input name="slope3" inputmode="decimal" /></div><div><label>Изложение, азимут °</label><input name="aspectDeg" inputmode="decimal" /></div><div><label>Изложение, клас</label><select name="aspectClass"><option value=""></option><option>flat</option><option>N</option><option>NE</option><option>E</option><option>SE</option><option>S</option><option>SW</option><option>W</option><option>NW</option></select></div>
+          <div><label>Общ брой точки</label><input name="totalPoints" inputmode="numeric" readonly /><div class="hint">Изчислява се автоматично според вида, дължината на трансекта и интервала между точките.</div></div>
+          <div class="wide"><h2 style="margin-top:4px">Брой точки по категории</h2><div class="cover-counts">
+            <div><label>Тревиста растителност</label><input name="herbaceous" inputmode="numeric" /></div>
+<div><label>Гола почва</label><input name="bareSoil" inputmode="numeric" /></div>
+<div><label>Чакъл / дребни камъни</label><input name="gravelSmallStones" inputmode="numeric" /></div>
+<div><label>Едри камъни</label><input name="largeStones" inputmode="numeric" /></div>
+<div><label>Гола скала</label><input name="exposedRock" inputmode="numeric" /></div>
+<div><label>Хвойна</label><input name="juniper" inputmode="numeric" /></div>
+<div><label>Други храсти</label><input name="otherShrubs" inputmode="numeric" /></div>
+<div><label>Постилка / мъх / лишеи</label><input name="litterMossLichen" inputmode="numeric" /></div>
+<div><label>Река/поток</label><input name="riverStream" inputmode="numeric" /></div>
+<div><label>Стоящи водни площи</label><input name="standingWater" inputmode="numeric" /></div>
+<div><label>Крайречна растителност</label><input name="riparianVegetation" inputmode="numeric" /></div>
+<div><label>Блато/мочурище</label><input name="marshWetland" inputmode="numeric" /></div>
+<div><label>Открито море</label><input name="openSea" inputmode="numeric" /></div>
+<div><label>Крайбрежна ивица</label><input name="coastline" inputmode="numeric" /></div>
+<div><label>Скали/дефиле</label><input name="cliffsGorge" inputmode="numeric" /></div>
+<div><label>Обработваеми земи</label><input name="arableLand" inputmode="numeric" /></div>
+<div><label>Гора (широколистна)</label><input name="forestBroadleaf" inputmode="numeric" /></div>
+<div><label>Гора (иглолистна)</label><input name="forestConiferous" inputmode="numeric" /></div>
+<div><label>Гора (смесена)</label><input name="forestMixed" inputmode="numeric" /></div>
+<div><label>Постройки</label><input name="buildings" inputmode="numeric" /></div>
+<div><label>Сметища</label><input name="landfill" inputmode="numeric" /></div>
+<div><label>Други</label><input name="other" inputmode="numeric" /></div>
+          </div></div>
+          <div class="wide summary" id="coverSummary"></div>
+        </div></div>
+      </div>
+
+      <div id="tab-coverpoints" class="tabpane hidden">
+        <div class="card"><h2>4. Трансекти: точково отчитане на покривката</h2>
+          <div class="section-note">
+            Избери дали пробонабирането да бъде кръстовидно (+) или по една права линия (-). При правата линия избери посока от началния към крайния сектор на компаса. Дължината е пълната дължина през центъра C; интервалът определя през колко метра се записва точка.
+          </div>
+          <div class="grid4" style="margin-bottom:10px">
+            <div><label>Вид трансект</label><select name="transectLayout"><option value="cross">Кръст (+)</option><option value="line">Права линия (-)</option></select></div>
+            <div><label>Посока</label><select name="transectDirection"></select></div>
+            <div><label>Дължина на трансекта, m</label><input name="transectLength" inputmode="decimal" value="50" /></div>
+            <div><label>Интервал между точките, m</label><input name="transectSpacing" inputmode="decimal" value="1" /></div>
+          </div>
+          <div class="transect-scheme mono" id="transectScheme" aria-label="Схема на трансектите"></div>
+          <div class="cover-toolbar"><button type="button" class="ghost" id="undoPointBtn">↩ Назад 1 точка</button><button type="button" class="danger" id="clearPointsBtn">Изчисти точките</button></div>
+          <div class="metric"><b id="coverProgressText">0 / 100</b><span>въведени точки по трансектите</span><div class="progressbar"><div id="coverProgressBar"></div></div></div>
+          <div class="metric"><b id="activeTransectText">Активен лъч: N</b><span>натисни лъч, после избери точка и категория</span></div>
+          <div class="transect-buttons" id="transectButtons"></div>
+          <div class="cover-cats" id="coverCategoryButtons"></div>
+          <div class="section-note">Клетките показват номера на точката и съкращението на категорията. Пример: <span class="kbd">7 ТР</span> = седма точка с тревиста растителност. Натисни клетка, за да я избереш; избраната точка се очертава ясно. След това натисни категория, за да въведеш или замениш стойността.</div>
+          <div class="metric"><b id="selectedPointText">Избрана точка: N1</b><span>стойността се въвежда чрез бутоните за категории</span></div><div class="transect-grid" id="coverPointGrid"></div>
+          <div class="stats-box card" style="box-shadow:none;margin-top:10px"><h2>Статистика на покривката от трансектите</h2><div class="section-note" id="coverStatsStatus">Процентите се изчисляват автоматично от въведените точки. Те са окончателни след попълване на всички точки според избраната конфигурация на трансекта.</div><div id="coverStatsTable"></div></div>
+        </div>
+      </div>
+
+
+      <div id="tab-stationary" class="tabpane hidden">
+        <div class="card"><h2>5. Стационарно отчитане: миграция на птици</h2>
+          <div class="section-note">Този раздел е оптимизиран за бързо записване на миграция от стационарна точка. Първо избери тип на миграцията, след това посока на полета, вид на полета и допълнителните параметри.</div>
+          <div class="stationary-compass" id="stationaryCompass" aria-label="Компас за посока на полета">
+            <button type="button" class="compass-btn" data-dir="NW">NW</button><button type="button" class="compass-btn" data-dir="N">N</button><button type="button" class="compass-btn" data-dir="NE">NE</button>
+            <button type="button" class="compass-btn" data-dir="W">W</button><div class="compass-center"><svg id="deviceCompassArrow" class="device-compass-arrow" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><polygon class="north-side" points="50,6 14,84 49,58"/><polygon class="north-main" points="49,58 50,6 86,84"/></svg></div><button type="button" class="compass-btn" data-dir="E">E</button>
+            <button type="button" class="compass-btn" data-dir="SW">SW</button><button type="button" class="compass-btn" data-dir="S">S</button><button type="button" class="compass-btn" data-dir="SE">SE</button>
+          </div>
+          <div class="grid">
+            <div><label>Тип на миграцията</label><select name="migrationType" id="migrationType"><option value=""></option><option value="day">Дневна</option><option value="night">Нощна</option></select></div>
+            <div><label>Посока на полета — от</label><select name="flightFrom" id="flightFrom"><option value=""></option><option>N</option><option>NE</option><option>E</option><option>SE</option><option>S</option><option>SW</option><option>W</option><option>NW</option></select></div>
+            <div><label>Посока на полета — към</label><select name="flightTo" id="flightTo"><option value=""></option><option>N</option><option>NE</option><option>E</option><option>SE</option><option>S</option><option>SW</option><option>W</option><option>NW</option></select></div>
+            <div><label>Вид на полета</label><select name="flightType"><option value=""></option><option value="active">Активен</option><option value="passive">Пасивен</option></select></div>
+            <div id="dayMigrationFields"><label>Височина на полет</label><input name="flightHeight" inputmode="decimal" placeholder="напр. ниско / средно / високо или m" /></div>
+          </div>
+          <div class="migration-mode-box hidden" id="nightMigrationFields">
+            <h2 style="margin-top:0">Нощна миграция</h2>
+            <div class="grid">
+              <div><label>Основен метод</label><select name="nightMigrationMethod"><option value=""></option><option value="sound">По звук</option><option value="moon_disk">На лунен диск</option><option value="thermal">Термално</option></select></div>
+              <div class="wide"><label>Второстепенни методи / бележки</label><textarea name="nightMigrationSecondary" ></textarea></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="tab-visibility" class="tabpane hidden">
+        <div class="card"><h2>6. Растителност и хоризонтална видимост</h2><div class="grid">
+          <div><label>Средна височина на тревистата растителност, cm</label><input name="meanHerbHeight" inputmode="decimal" /></div><div><label>Максимална височина на тревистата растителност, cm</label><input name="maxHerbHeight" inputmode="decimal" /></div>
+          <div class="wide location-field"><label>Друга растителност (дървета/храсти)</label><input id="vegetationInput" name="otherVegetationSpecies" autocomplete="off" /><div id="vegetationSuggestions" class="location-suggestions hidden"></div></div>
+          <div><label>Брой групи</label><input name="juniperClumps" inputmode="numeric" /></div><div><label>Модел</label><select name="juniperPattern"><option value=""></option><option value="isolated">Единична</option><option value="scattered">Разредена</option><option value="grouped">Групирана</option><option value="semi_continuous">Почти непрекъсната</option></select></div>
+          <div><label>Средна височина, cm</label><input name="meanJuniperHeight" inputmode="decimal" /></div><div><label>Максимална височина, cm</label><input name="maxJuniperHeight" inputmode="decimal" /></div><div><label>Разстояние до най-близка група, m</label><input name="nearestJuniperDistance" inputmode="decimal" /></div>
+          <div><label>Обиколка на ствол, cm</label><input name="trunkCircumference" inputmode="decimal" /></div><div><label>Състояние (живо/мъртво)</label><select name="vegetationCondition"><option value=""></option><option value="Живо">Живо</option><option value="Мъртво">Мъртво</option></select></div>
+          <div class="wide"><h2 style="margin-top:4px">Видимост по 8 посоки, %</h2><div class="grid4"><div><label>N</label><input name="visibilityN" inputmode="decimal" /></div><div><label>NE</label><input name="visibilityNE" inputmode="decimal" /></div><div><label>E</label><input name="visibilityE" inputmode="decimal" /></div><div><label>SE</label><input name="visibilitySE" inputmode="decimal" /></div><div><label>S</label><input name="visibilityS" inputmode="decimal" /></div><div><label>SW</label><input name="visibilitySW" inputmode="decimal" /></div><div><label>W</label><input name="visibilityW" inputmode="decimal" /></div><div><label>NW</label><input name="visibilityNW" inputmode="decimal" /></div></div></div>
+          <div class="wide summary" id="visibilitySummary"></div>
+        </div></div>
+      </div>
+
+      <div id="tab-notes" class="tabpane hidden">
+        <div class="card"><h2>6. Заплахи, МТО, бележки</h2>
+          <div class="grid">
+            <div class="wide">
+              <label>Заплахи</label>
+              <input type="hidden" name="threats" id="threatsInput" />
+              <div class="threat-options" id="threatOptions"></div>
+              <div class="hint">Може да се изберат повече от една опция.</div>
+            </div>
+            <div class="wide"><h2 style="margin-top:6px">МТО</h2></div>
+            <div><label>Облачност, %</label><input name="cloudCover" inputmode="decimal" /></div>
+            <div><label>Дъжд</label><select name="rain"><option value=""></option><option>Не вали</option><option>Ръми</option><option>Слаб дъжд</option><option>Умерен дъжд</option><option>Силен дъжд</option></select></div>
+            <div><label>Видимост, km</label><input name="visibilityKm" inputmode="decimal" /></div>
+            <div><label>Посока на вятъра</label><select name="windDirection"><option value=""></option><option>Безветрие</option><option>N</option><option>NNE</option><option>NE</option><option>ENE</option><option>E</option><option>ESE</option><option>SE</option><option>SSE</option><option>S</option><option>SSW</option><option>SW</option><option>WSW</option><option>W</option><option>WNW</option><option>NW</option><option>NNW</option></select></div>
+            <div><label>Температура, °C</label><input name="temperatureC" inputmode="decimal" /></div>
+            <div><label>Вид облаци</label><select name="cloudType"><option value=""></option><option>Перести</option><option>Слоести</option><option>Купести</option></select></div>
+            <div class="wide"><label>Други</label><textarea name="meteoOther"></textarea></div>
+            <div class="wide"><label>Бележки</label><textarea name="notes"></textarea></div>
+          </div>
+        </div>
+      </div>
+    </form>
+    <div class="stickybar"><button id="saveBtn">💾 Запази</button><button id="resetBtn" class="ghost">Нов</button></div>
+  </section>
+
+  <aside class="side">
+    <div class="card"><h2>Списък със записи</h2><input id="search" placeholder="търсене" /><div id="records"></div><button type="button" class="danger full" id="deleteAllRecordsBtn" style="margin-top:8px">Изтрий всички</button><div class="export-block"><h2>Запис и експорт</h2><div class="grid2" style="margin:10px 0"><button id="csvBtn" class="ghost">⬇ CSV</button><button id="excelCurrentBtn" class="ghost">⬇ Excel текущ</button><button id="excelAllBtn" class="ghost">⬇ Excel всички</button><button id="jsonBtn" class="ghost">⬇ JSON</button><button id="geojsonBtn" class="ghost">⬇ GeoJSON</button><button id="kmlBtn" class="ghost">⬇ KML</button></div><label class="button ghost full" style="margin-bottom:8px">⬆ Импорт JSON<input id="importFile" type="file" accept="application/json" hidden></label></div></div>
+    <div class="card install-note"><h2>Бърз протокол</h2><ol><li>Вземи GPS координати.</li><li>Определи occupied/control/nest.</li><li>Запиши метод на установяване.</li><li>Измери три наклона и изложение.</li><li>В таб „Трансекти“ избери конфигурация и въведи покривката по активните лъчи.</li><li>Измери видимост в 8 посоки.</li><li>Запази и експортирай CSV/Excel/JSON/GeoJSON/KML.</li></ol></div>
+  </aside>
+</main>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
